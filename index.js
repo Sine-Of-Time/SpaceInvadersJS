@@ -12,6 +12,7 @@ class Player {
         }
 
         this.rotation = 0
+        this.opacity = 1
 
         const image = new Image()
         image.src = './img/spaceship.png'
@@ -33,7 +34,10 @@ class Player {
        //     this.height)
        
        c.save()
+       c.globalAlpha = this.opacity
        //c.translate(player.position.x+(player.width/2) , player.position.y)
+       
+     
 
        c.drawImage(
                 this.image, 
@@ -248,6 +252,11 @@ const keys = {
 
 let frames = 0
 let randomInterval = Math.floor((Math.random()*500)+500)
+let game = {
+    over: false,
+    active: false
+}
+
 
 for (let i = 0; i < 100; i++) {
     particles.push(
@@ -326,6 +335,12 @@ function animate(){
              player.width
         ){
                 console.log('You Loose')
+                setTimeout(() => {
+                    invaderProjectile.splice(index, 1)
+                    player.opacity=0
+                    game.over = true
+                }, 0)
+
                 createParticles({
                     object: player,
                     color: 'white',
