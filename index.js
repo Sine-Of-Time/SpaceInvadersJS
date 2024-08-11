@@ -75,6 +75,28 @@ class Projectile{
     }
 }
 
+class InvaderProjectile{
+    constructor({position,velocity}){
+        this.position = position
+        this.velocity = velocity
+
+        this.width = 3
+        this.height = 10
+    }
+
+    draw(){
+       c.fillStyle = 'white'
+       c.fillRect(this.position.x, this.position.y, this.width,
+            this.height)
+    }
+
+    update(){
+        this.draw()
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+    }
+}
+
 class Invader {
     constructor({position}){       
        this.velocity = {
@@ -99,21 +121,34 @@ class Invader {
     draw(){
        // c.fillStyle = 'red'
        c.drawImage(
-                this.image, 
-                this.position.x, 
-                this.position.y,
-                this.width, 
-                this.height) 
+            this.image, 
+            this.position.x, 
+            this.position.y,
+            this.width, 
+            this.height) 
     }
 
-    update({velocity}){
-        if(this.image){
+    update({ velocity }){
+        if (this.image){
             this.draw()
             this.position.x += velocity.x
             this.position.y += velocity.y
         }
     }
 
+    shoot(invaderProjectiles){
+        invaderProjectiles.push(
+        new InvaderProjectile({
+           position: {
+                x: this.position.x + this.width / 2,
+                y: this.position.y + this.height
+           },
+           velocity: {
+             x:0,
+             y:5
+           }
+        }))
+    }
 }
 
 class Grid {
@@ -146,7 +181,7 @@ class Grid {
           )
         }
       }
-        console.log(this.invaders)
+        //console.log(this.invaders)
     }
     update(){
         this.position.x += this.velocity.x
@@ -166,6 +201,7 @@ class Grid {
 const player = new Player ()
 const projectiles = []
 const grids = []
+const invaderProjectiles = []
 
 const keys = {
     a: {
@@ -182,13 +218,35 @@ const keys = {
 let frames = 0
 let randomInterval = Math.floor((Math.random()*500)+500)
 
-console.log(randomInterval)
+//console.log(randomInterval)
 
 function animate(){
     requestAnimationFrame(animate)
     c.fillStyle = 'black'
     c.fillRect(0,0,canvas.width,canvas.height)
     player.update()
+    invaderProjectiles.forEach((invaderProjectile, index)=> {
+        if( invaderProjectile.position.y + invaderProjectile.height >= canvas.height){
+            setTimeout(()=>{
+                invaderProjectiles.splice(index, 1)
+            },0)
+        }else invaderProjectile.update()
+
+        if (invaderProjectile.position.y + invaderProjectile.height 
+            >= 
+            player.position.y && 
+            invaderProjectile.position.x + invaderProjectile.width
+            >=
+            player.position.x && 
+            invaderProjectile.position.x <= player.position.x + 
+             player.width
+        ){
+                console.log('You Loose')
+            }
+    })
+    
+    //console.log(invaderProjectiles)
+
     projectiles.forEach((projectile, index) => {
         if (projectile.position.y + projectile.radius <= 0) {
             setTimeout(()=>{
@@ -199,8 +257,15 @@ function animate(){
         }
     })
 
-    grids.forEach((grid) => {
+    grids.forEach((grid, gridIndex) => {
         grid.update()
+
+        // spawn projectiles
+        if (frames % 100 === 0 && grid.invaders.length > 0) {
+            grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(invaderProjectiles)
+        }
+
+
         grid.invaders.forEach((invader,i) => {
             invader.update({velocity: grid.velocity})  
             
@@ -232,11 +297,14 @@ function animate(){
                                     const lastInvader = grid.invaders[grid.
                                         invaders.length - 1]
                                     
-                                    grid.width = lastInvader.position.x - 
+                                    grid.width = 
+                                    lastInvader.position.x - 
                                     firstInvader.position.x + 
                                     lastInvader.width
                                     grid.position.x = firstInvader.position.x
-                                }
+                                } else{
+                                   grids.splice(gridIndex, 1)
+                                } 
                             }
                         },0)
                     }
@@ -253,14 +321,15 @@ function animate(){
         player.velocity.x = 0 
     }
 
-    console.log(frames)
+    //console.log(frames)
     //spawning invaders
     if (frames%randomInterval==0){
         grids.push(new Grid())
         randomInterval = Math.floor((Math.random()*500)+500)
         frames=0
-        console.log(randomInterval)
+        //console.log(randomInterval)
     }
+
 
     frames++
 }
@@ -270,16 +339,16 @@ animate()
 addEventListener('keydown', ({key})=> {
     switch(key){
         case 'a':
-            console.log('left')
+            //console.log('left')
             player.velocity.x = -5
             keys.a.pressed = true
             break
         case 'd':
-            console.log('right')
+            //console.log('right')
             keys.d.pressed = true
             break
         case ' ':
-            console.log('space')
+            //console.log('space')
             projectiles.push(new Projectile({
                 position: {
                     x: player.position.x+(player.width/2), 
@@ -299,16 +368,16 @@ addEventListener('keydown', ({key})=> {
 addEventListener('keyup', ({key})=> {
     switch(key){
         case 'a':
-            console.log('left')
+            //console.log('left')
             player.velocity.x = -5
             keys.a.pressed = false
             break
         case 'd':
-            console.log('right')
+            //console.log('right')
             keys.d.pressed = false
             break
         case ' ':
-            console.log('space')
+            //console.log('space')
             break   
     }
 })
