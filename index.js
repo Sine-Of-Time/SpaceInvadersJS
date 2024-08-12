@@ -4,8 +4,8 @@ const c = canvas.getContext('2d')
 
 console.log(scoreEl)
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+canvas.width = 1024
+canvas.height = 576
 
 class Player {
     constructor(){       
@@ -410,7 +410,7 @@ function animate(){
                             //remove invader and projectile
                             if(invaderFound && projectileFound){
                                 score += 100
-                                console.log(score)
+                               
                                 scoreEl.innerHTML = score
 
                                 for(let i=0; i <15; i++){
